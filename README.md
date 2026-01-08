@@ -1,12 +1,12 @@
 # Progetto CKY per il Quenya
 
-**Corso**: Tecnologie del Linguaggio Naturale - Informatica  
-**Anno Accademico**: 2023/2024  
-**Argomento**: Implementazione dell'algoritmo CKY con applicazione alla lingua Quenya (Elfico)
+ Tecnologie del Linguaggio Naturale - Informatica  
+ 2023/2024  
+ Implementazione dell'algoritmo CKY con applicazione alla lingua Quenya (Elfico)
 
 ---
 
-## 📋 Indice
+## Indice
 
 1. [Introduzione](#introduzione)
 2. [Struttura del Progetto](#struttura-del-progetto)
@@ -18,20 +18,20 @@
 
 ---
 
-## 🎯 Introduzione
+## Introduzione
 
 Questo progetto implementa l'algoritmo **CKY (Cocke-Kasami-Younger)** per il parsing di grammatiche context-free e lo applica alla **lingua Quenya**, una delle lingue elfiche create da J.R.R. Tolkien.
 
 ### Obiettivi del Progetto
 
-- ✅ **Parte A**: Implementare CKY from scratch
-- ✅ **Parte B**: Testare su grammatica L1 di Jurafsky & Martin
-- ✅ **Parte C**: Creare grammatica Quenya e testare con CKY
-- ✅ **Parte D (Bonus)**: Grammatica Quenya con semantica composizionale (NLTK)
+- Parte A: Implementare CKY from scratch
+- Parte B: Testare su grammatica L1 di Jurafsky & Martin
+- Parte C: Creare grammatica Quenya e testare con CKY
+- Parte D (Bonus): Grammatica Quenya con semantica composizionale (NLTK)
 
 ---
 
-## 📁 Struttura del Progetto
+## Struttura del Progetto
 
 ```
 progetto-cky-quenya/
@@ -47,7 +47,7 @@ progetto-cky-quenya/
 
 ---
 
-## 🔧 Installazione
+## Installazione
 
 ### Prerequisiti
 
@@ -85,7 +85,7 @@ python main.py
 
 ---
 
-## 🚀 Utilizzo
+## Utilizzo
 
 ### Esecuzione Interattiva
 
@@ -117,7 +117,7 @@ python quenya_semantic.py
 
 ---
 
-## 📚 Descrizione delle Componenti
+## Descrizione delle Componenti
 
 ### 1. `cky_parser.py` - Algoritmo CKY
 
@@ -213,13 +213,13 @@ Significato: "Esiste un x tale che x è un elfo e x risplende"
 
 ---
 
-## 📊 Risultati
+## Risultati
 
 ### Grammatica L1 (Jurafsky)
 
 **Frasi parsificate con successo:**
-- ✅ "book the flight through Houston"
-- ✅ "does she prefer a morning flight"
+-  "book the flight through Houston"
+-  "does she prefer a morning flight"
 
 **Statistiche:**
 - Tempo di parsing: < 1ms per frase
@@ -228,12 +228,12 @@ Significato: "Esiste un x tale che x è un elfo e x risplende"
 ### Grammatica Quenya
 
 **Frasi parsificate con successo:**
-- ✅ "i elda ná vanya" (l'elfo è bello)
-- ✅ "i aran cálë" (il re risplende)
-- ✅ "i aranel tirë i elen" (la principessa guarda la stella)
-- ✅ "i cirya vanya" (la nave bella)
-- ✅ "i eldar lir-" (gli elfi cantano)
-- ✅ "elen calima" (stella luminosa)
+- "i elda ná vanya" (l'elfo è bello)
+- "i aran cálë" (il re risplende)
+- "i aranel tirë i elen" (la principessa guarda la stella)
+- "i cirya vanya" (la nave bella)
+- "i eldar lir-" (gli elfi cantano)
+- "elen calima" (stella luminosa)
 
 **Coverage lessicale:**
 - 80+ parole Quenya
@@ -243,13 +243,13 @@ Significato: "Esiste un x tale che x è un elfo e x risplende"
 ### Grammatica Semantica (Bonus)
 
 **Frasi con rappresentazione logica:**
-- ✅ "i elda cálë" → `∃x.(elda(x) ∧ cale(x))`
-- ✅ "i aran tirë i elen" → `∃x.∃y.(aran(x) ∧ elen(y) ∧ tire(x,y))`
-- ✅ "galadriel lírë" → `lire(galadriel)`
+- "i elda cálë" → `∃x.(elda(x) ∧ cale(x))`
+- "i aran tirë i elen" → `∃x.∃y.(aran(x) ∧ elen(y) ∧ tire(x,y))`
+- "galadriel lírë" → `lire(galadriel)`
 
 ---
 
-## 📖 Bibliografia
+## Bibliografia
 
 ### Libri di Riferimento
 
@@ -281,7 +281,7 @@ Significato: "Esiste un x tale che x è un elfo e x risplende"
 
 ---
 
-## 🎓 Note Aggiuntive
+## Note Aggiuntive
 
 ### Differenze tra Inglese e Quenya
 
@@ -317,29 +317,3 @@ Significato: "Esiste un x tale che x è un elfo e x risplende"
    - Neural parsing
 
 ---
-
-## 👨‍💻 Autore
-
-[Il tuo nome]  
-Corso di Tecnologie del Linguaggio Naturale  
-Università [Nome Università]  
-Anno Accademico 2023/2024
-
----
-
-## 📄 Licenza
-
-Questo progetto è sviluppato per scopi didattici nell'ambito del corso di Tecnologie del Linguaggio Naturale.
-
----
-
-## 🙏 Ringraziamenti
-
-- Prof. [Nome Professore] per il corso di TLN
-- J.R.R. Tolkien per la creazione del Quenya
-- Comunità Eldamo per le risorse linguistiche
-- NLTK team per gli strumenti di parsing
-
----
-
-**Namárië!** (Addio in Quenya) 🧝‍♂️
