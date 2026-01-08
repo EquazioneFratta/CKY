@@ -51,7 +51,6 @@ class Grammar:
         return True
     
     def __str__(self):
-        """Rappresentazione testuale della grammatica"""
         lines = ["=== Grammar Rules ==="]
         for lhs, rules_list in sorted(self.rules.items()):
             for rhs in rules_list:
@@ -66,9 +65,6 @@ class Grammar:
 
 
 class CKYParser:
-    """
-    Implementazione dell'algoritmo CKY per parsing di grammatiche context-free
-    """
     
     def __init__(self, grammar: Grammar):
         self.grammar = grammar
@@ -278,47 +274,34 @@ def create_l1_grammar():
     grammar.add_rule('PP', ('Preposition', 'NP'))
     
     # Regole lessicali (terminali)
-    # Nomi
     grammar.add_lexical_rule('book', 'Noun')
     grammar.add_lexical_rule('flight', 'Noun')
     grammar.add_lexical_rule('morning', 'Noun')
     
-    # Verbi
     grammar.add_lexical_rule('book', 'Verb')
     grammar.add_lexical_rule('prefer', 'Verb')
     
-    # Determinanti
     grammar.add_lexical_rule('the', 'Det')
     grammar.add_lexical_rule('a', 'Det')
     
-    # Preposizioni
     grammar.add_lexical_rule('through', 'Preposition')
     
-    # Nomi propri (aggiungiamo regola per trattarli come NP)
     grammar.add_lexical_rule('houston', 'Proper-Noun')
-    grammar.add_rule('NP', ('Proper-Noun',))  # Regola unaria gestita
+    grammar.add_rule('NP', ('Proper-Noun',))
     
-    # Pronomi (aggiungiamo regola per trattarli come NP)
     grammar.add_lexical_rule('she', 'Pronoun')
-    grammar.add_rule('NP', ('Pronoun',))  # Regola unaria gestita
+    grammar.add_rule('NP', ('Pronoun',))  
     
-    # Ausiliari
     grammar.add_lexical_rule('does', 'Aux')
-    
-    # Per le regole unarie (A → B), le gestiamo durante il parsing
-    # aggiungendo chiusura transitiva
-    
-    # Aggiungiamo anche Nominal → Noun come regola unaria
+        
     grammar.add_rule('Nominal', ('Noun',))
     
-    # E VP → Verb
     grammar.add_rule('VP', ('Verb',))
     
     return grammar
 
 
 def test_l1_grammar():
-    """Test dell'algoritmo CKY sulla grammatica L1"""
     print("=" * 70)
     print("TEST: Grammatica L1 di Jurafsky & Martin")
     print("=" * 70)
@@ -329,7 +312,6 @@ def test_l1_grammar():
     
     parser = CKYParser(grammar)
     
-    # Test sentences
     test_sentences = [
         "book the flight through Houston",
         "does she prefer a morning flight"
@@ -346,13 +328,13 @@ def test_l1_grammar():
         parser.print_table(words)
         
         if success:
-            print(f"✓ Parsing riuscito! Trovati {len(trees)} albero/i di parsing.\n")
+            print(f"Parsing riuscito! Trovati {len(trees)} albero/i di parsing.\n")
             for idx, tree in enumerate(trees, 1):
                 print(f"--- Parse Tree {idx} ---")
                 parser.print_tree(tree)
                 print()
         else:
-            print("✗ Parsing fallito. La frase non è generabile dalla grammatica.\n")
+            print("Parsing fallito. La frase non è generabile dalla grammatica.\n")
 
 
 if __name__ == "__main__":

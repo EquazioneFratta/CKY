@@ -1,14 +1,4 @@
-"""
-Grammatica Quenya per CKY Parser
-Basata sulla morfologia e sintassi del Quenya (lingua elfica di Tolkien)
-
-Riferimenti:
-- https://eldamo.org/intro-quenya/
-- http://ardalambion.immaginario.net/ardalambion/qcourse.htm
-"""
-
 from cky_parser import Grammar, CKYParser
-
 
 def create_quenya_grammar():
     """
@@ -21,14 +11,12 @@ def create_quenya_grammar():
     grammar = Grammar()
     grammar.start_symbol = 'S'
     
-    # === REGOLE SINTATTICHE ===
+    # Regike sintattiche
     
-    # Frasi principali
     grammar.add_rule('S', ('NP', 'VP'))      # Frase con soggetto e predicato
     grammar.add_rule('S', ('NP', 'NP'))      # Frase nominale (copula implicita)
     grammar.add_rule('S', ('VP',))            # Frase senza soggetto esplicito
     
-    # Sintagmi nominali
     grammar.add_rule('NP', ('N',))            # Nome semplice
     grammar.add_rule('NP', ('Det', 'N'))      # Determinante + Nome
     grammar.add_rule('NP', ('N', 'Adj'))      # Nome + Aggettivo
@@ -38,21 +26,17 @@ def create_quenya_grammar():
     grammar.add_rule('NP', ('NP', 'PP'))      # NP con complemento preposizionale
     grammar.add_rule('NP', ('Pron',))         # Pronome
     
-    # Nome + Aggettivo
     grammar.add_rule('NAdj', ('N', 'Adj'))
     
-    # Sintagmi verbali
     grammar.add_rule('VP', ('V',))            # Verbo intransitivo
     grammar.add_rule('VP', ('NP', 'V'))       # OV (Oggetto-Verbo)
     grammar.add_rule('VP', ('V', 'NP'))       # VO (Verbo-Oggetto)
     grammar.add_rule('VP', ('VP', 'PP'))      # VP con complemento
     
-    # Sintagmi preposizionali
     grammar.add_rule('PP', ('Prep', 'NP'))    # Preposizione + NP
     
-    # === LESSICO QUENYA ===
+    # Lessico quenya
     
-    # Nomi (Sostantivi)
     grammar.add_lexical_rule('elda', 'N')         # elfo
     grammar.add_lexical_rule('eldar', 'N')        # elfi
     grammar.add_lexical_rule('aran', 'N')         # re
@@ -87,7 +71,6 @@ def create_quenya_grammar():
     grammar.add_lexical_rule('ambar', 'N')        # mondo/terra
     grammar.add_lexical_rule('eä', 'N')           # universo
     
-    # Aggettivi
     grammar.add_lexical_rule('vanya', 'Adj')      # bello
     grammar.add_lexical_rule('vanima', 'Adj')     # bellissimo
     grammar.add_lexical_rule('calima', 'Adj')     # luminoso
@@ -107,7 +90,6 @@ def create_quenya_grammar():
     grammar.add_lexical_rule('laurëa', 'Adj')     # d'oro/dorato
     grammar.add_lexical_rule('ilya', 'Adj')       # ogni/tutto
     
-    # Verbi (forme base)
     grammar.add_lexical_rule('ná', 'V')           # è/essere
     grammar.add_lexical_rule('mar-', 'V')         # abitare
     grammar.add_lexical_rule('mat-', 'V')         # mangiare
@@ -125,7 +107,6 @@ def create_quenya_grammar():
     grammar.add_lexical_rule('yé', 'V')           # sarà
     grammar.add_lexical_rule('ortanë', 'V')       # ha innalzato
     
-    # Pronomi
     grammar.add_lexical_rule('ni', 'Pron')        # io
     grammar.add_lexical_rule('le', 'Pron')        # tu
     grammar.add_lexical_rule('se', 'Pron')        # lui/lei
@@ -133,11 +114,9 @@ def create_quenya_grammar():
     grammar.add_lexical_rule('lye', 'Pron')       # voi
     grammar.add_lexical_rule('te', 'Pron')        # loro
     
-    # Determinanti/Articoli
     grammar.add_lexical_rule('i', 'Det')          # il/la/i/le (articolo)
     grammar.add_lexical_rule('in', 'Det')         # il (alternativo)
     
-    # Preposizioni
     grammar.add_lexical_rule('mi', 'Prep')        # in
     grammar.add_lexical_rule('nu', 'Prep')        # sotto
     grammar.add_lexical_rule('ar', 'Prep')        # e/con
@@ -150,9 +129,6 @@ def create_quenya_grammar():
 
 
 def create_quenya_test_sentences():
-    """
-    Crea frasi di test in Quenya con traduzione
-    """
     return [
         {
             'quenya': 'i elda ná vanya',
@@ -188,7 +164,6 @@ def create_quenya_test_sentences():
 
 
 def test_quenya_grammar():
-    """Test della grammatica Quenya"""
     print("=" * 70)
     print("TEST: Grammatica Quenya (Lingua Elfica)")
     print("=" * 70)
@@ -221,13 +196,13 @@ def test_quenya_grammar():
         parser.print_table(words)
         
         if success:
-            print(f"✓ Parsing riuscito! Trovati {len(trees)} albero/i di parsing.\n")
+            print(f"Parsing riuscito! Trovati {len(trees)} albero/i di parsing.\n")
             for idx, tree in enumerate(trees, 1):
                 print(f"--- Parse Tree {idx} ---")
                 parser.print_tree(tree)
                 print()
         else:
-            print("✗ Parsing fallito. La frase non è generabile dalla grammatica.\n")
+            print("Parsing fallito. La frase non è generabile dalla grammatica.\n")
 
 
 if __name__ == "__main__":
