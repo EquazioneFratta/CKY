@@ -38,6 +38,8 @@ def create_quenya_grammar():
     grammar.add_lexical_rule('tecil', 'Noun')        # pen
     grammar.add_lexical_rule('hesto', 'Noun')        # captain
     
+    grammar.add_lexical_rule('lumba', 'Noun')        # captain
+    
     grammar.add_lexical_rule('antanë', 'Verb')       # gave
     grammar.add_lexical_rule('samë', 'Verb')         # has
     grammar.add_lexical_rule('tíra', 'Verb')         # is watching
