@@ -1,68 +1,54 @@
-"""
-CKY Parser Implementation
-Progetto di Tecnologie del Linguaggio Naturale
-Implementazione dell'algoritmo CKY (Cocke-Kasami-Younger) per parsing di grammatiche context-free
-"""
-
 from collections import defaultdict
-from typing import Dict, List, Set, Tuple, Optional
-import copy
+from typing import List, Tuple, Optional
 
-
+#grammatica context-free in forma normale di Chomsky (CNF)
 class Grammar:
-    """Rappresenta una grammatica context-free in forma normale di Chomsky (CNF)"""
     
     def __init__(self):
-        self.rules = defaultdict(list)  # {LHS: [(RHS,), ...]}
-        self.lexicon = defaultdict(list)  # {word: [POS, ...]}
+        self.rules = defaultdict(list)  # regola di produzione, es. NP -> [(Det, Nominal), ...] 
+        self.lexicon = defaultdict(list)  # produzione lessicale, es. dog -> [N]
         self.start_symbol = 'S'
         
-    def add_rule(self, lhs: str, rhs: Tuple):
-        """Aggiunge una regola alla grammatica"""
-        self.rules[lhs].append(rhs)
+    def add_rule(self, head: str, body: Tuple):
+        self.rules[head].append(body)
         
     def add_lexical_rule(self, word: str, pos: str):
-        """Aggiunge una regola lessicale"""
         if pos not in self.lexicon[word]:
             self.lexicon[word].append(pos)
     
     def get_pos_for_word(self, word: str) -> List[str]:
-        """Ritorna le categorie grammaticali possibili per una parola"""
         return self.lexicon.get(word.lower(), [])
     
-    def get_rules_by_rhs(self, rhs: Tuple) -> List[str]:
-        """Ritorna tutti i LHS che possono generare il dato RHS"""
+    def get_rules_by_body(self, body: Tuple) -> List[str]:
         result = []
-        for lhs, rules in self.rules.items():
-            if rhs in rules:
-                result.append(lhs)
+        for head, rules in self.rules.items():
+            if body in rules:
+                result.append(head)
         return result
     
     def is_cnf(self) -> bool:
-        """Verifica se la grammatica è in forma normale di Chomsky"""
-        for lhs, rules_list in self.rules.items():
-            for rhs in rules_list:
-                if len(rhs) > 2:
+        for _, rules_list in self.rules.items():
+            for body in rules_list:
+                if len(body) > 2:
                     return False
-                if len(rhs) == 2:
-                    # Deve essere A -> B C (due non-terminali)
-                    if not all(symbol[0].isupper() for symbol in rhs):
+                if len(body) == 2:
+                    # deve essere A -> B C (due non-terminali)<
+                    if not all(symbol[0].isupper() for symbol in body):
                         return False
         return True
     
-    def __str__(self):
-        lines = ["=== Grammar Rules ==="]
-        for lhs, rules_list in sorted(self.rules.items()):
-            for rhs in rules_list:
-                lines.append(f"{lhs} -> {' '.join(rhs)}")
+    # def __str__(self):
+    #     lines = ["regole"]
+    #     for head, rules_list in sorted(self.rules.items()):
+    #         for body in rules_list:
+    #             lines.append(f"{head} -> {' '.join(body)}")
         
-        lines.append("\n=== Lexicon ===")
-        for word, pos_list in sorted(self.lexicon.items()):
-            for pos in pos_list:
-                lines.append(f"{pos} -> {word}")
+    #     lines.append("\nlessico")
+    #     for word, pos_list in sorted(self.lexicon.items()):
+    #         for pos in pos_list:
+    #             lines.append(f"{pos} -> {word}")
         
-        return "\n".join(lines)
-
+    #     return "\n".join(lines)
 
 class CKYParser:
     
@@ -71,16 +57,8 @@ class CKYParser:
         self.table = None
         self.back_pointers = None
         
-    def parse(self, sentence: str) -> Tuple[bool, Optional[List]]:
-        """
-        Esegue il parsing CKY di una frase
-        
-        Args:
-            sentence: La frase da analizzare
-            
-        Returns:
-            (success, parse_trees): Tupla con booleano di successo e lista di parse trees
-        """
+    # -> Tuple[bool, Optional[List]]
+    def parse(self, sentence: str):
         words = sentence.lower().split()
         n = len(words)
         
@@ -121,9 +99,9 @@ class CKYParser:
                     for B in self.table[i][k]:
                         for C in self.table[k+1][j]:
                             # Cerca regole A -> B C
-                            lhs_list = self.grammar.get_rules_by_rhs((B, C))
+                            head_list = self.grammar.get_rules_by_body((B, C))
                             
-                            for A in lhs_list:
+                            for A in head_list:
                                 if A not in self.table[i][j]:
                                     self.table[i][j].add(A)
                                     # Salva il back-pointer per ricostruire l'albero
@@ -154,7 +132,7 @@ class CKYParser:
             
             for B in current_symbols:
                 # Cerca regole unarie A → B
-                unary_rules = self.grammar.get_rules_by_rhs((B,))
+                unary_rules = self.grammar.get_rules_by_body((B,))
                 
                 for A in unary_rules:
                     if A not in self.table[i][j]:
@@ -242,73 +220,64 @@ class CKYParser:
         else:
             print("  " * indent + str(tree))
 
-
+# crea la grammatica L1 in CNF
 def create_l1_grammar():
-    """
-    Crea la grammatica L1 da Jurafsky & Martin (3rd ed., Fig. 18.10)
-    Convertita in Forma Normale di Chomsky (CNF)
-    
-    CNF Requirements:
-    - A → BC (due non-terminali)
-    - A → a (terminale)
-    - Nessuna regola unaria A → B (gestite nella tabella)
-    """
     grammar = Grammar()
     grammar.start_symbol = 'S'
     
-    # Regole sintattiche binarie (CNF)
     grammar.add_rule('S', ('NP', 'VP'))
-    grammar.add_rule('S', ('Aux', 'NP-VP'))  # Aux NP VP → Aux (NP VP)
-    grammar.add_rule('NP-VP', ('NP', 'VP'))
-    grammar.add_rule('S', ('VP',))  # Per frasi imperative: VP → S
+    grammar.add_rule('S', ('Aux-NP', 'VP'))
+    grammar.add_rule('Aux-NP', ('Aux', 'NP'))
     
+    grammar.add_rule('S', ('VP',)) 
+    
+    grammar.add_rule('NP', ('Pronoun',))  
+    grammar.add_rule('NP', ('Proper-Noun',))
     grammar.add_rule('NP', ('Det', 'Nominal'))
-    
+    grammar.add_rule('Nominal', ('Noun',))
     grammar.add_rule('Nominal', ('Nominal', 'Noun'))
     grammar.add_rule('Nominal', ('Nominal', 'PP'))
     
+    grammar.add_rule('VP', ('Verb',))
     grammar.add_rule('VP', ('Verb', 'NP'))
+    grammar.add_rule('VP', ('Verb-NP', 'PP'))
+    grammar.add_rule('Verb-NP', ('Verb', 'NP'))
+    
     grammar.add_rule('VP', ('Verb', 'PP'))
     grammar.add_rule('VP', ('VP', 'PP'))
-    
     grammar.add_rule('PP', ('Preposition', 'NP'))
     
-    # Regole lessicali (terminali)
+    # regole lessicali 
     grammar.add_lexical_rule('book', 'Noun')
     grammar.add_lexical_rule('flight', 'Noun')
+    grammar.add_lexical_rule('meal', 'Noun')
     grammar.add_lexical_rule('morning', 'Noun')
     
     grammar.add_lexical_rule('book', 'Verb')
+    grammar.add_lexical_rule('include', 'Verb')
     grammar.add_lexical_rule('prefer', 'Verb')
+    
+    
+    grammar.add_lexical_rule('I', 'Pronoun')
+    grammar.add_lexical_rule('she', 'Pronoun')
+    grammar.add_lexical_rule('me', 'Pronoun')
+    
+    grammar.add_lexical_rule('United', 'Proper-Noun')
+    grammar.add_lexical_rule('Houston', 'Proper-Noun')
     
     grammar.add_lexical_rule('the', 'Det')
     grammar.add_lexical_rule('a', 'Det')
-    
+
     grammar.add_lexical_rule('through', 'Preposition')
-    
-    grammar.add_lexical_rule('houston', 'Proper-Noun')
-    grammar.add_rule('NP', ('Proper-Noun',))
-    
-    grammar.add_lexical_rule('she', 'Pronoun')
-    grammar.add_rule('NP', ('Pronoun',))  
-    
+
     grammar.add_lexical_rule('does', 'Aux')
-        
-    grammar.add_rule('Nominal', ('Noun',))
-    
-    grammar.add_rule('VP', ('Verb',))
     
     return grammar
 
-
 def test_l1_grammar():
-    print("=" * 70)
-    print("TEST: Grammatica L1 di Jurafsky & Martin")
-    print("=" * 70)
     
     grammar = create_l1_grammar()
     print(grammar)
-    print()
     
     parser = CKYParser(grammar)
     
@@ -318,9 +287,7 @@ def test_l1_grammar():
     ]
     
     for sentence in test_sentences:
-        print(f"\n{'=' * 70}")
         print(f"Parsing: '{sentence}'")
-        print('=' * 70)
         
         success, trees = parser.parse(sentence)
         
