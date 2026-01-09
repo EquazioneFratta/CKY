@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import List, Tuple, Optional
+from typing import List, Tuple
 
 #grammatica context-free in forma normale di Chomsky (CNF)
 class Grammar:
