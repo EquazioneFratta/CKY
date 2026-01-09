@@ -57,60 +57,94 @@ class CKYParser:
         self.table = None
         self.back_pointers = None
         
-    # -> Tuple[bool, Optional[List]]
     def parse(self, sentence: str):
         words = sentence.lower().split()
         n = len(words)
         
-        # Inizializza la tabella CKY (triangolare superiore)
         # table[i][j] contiene i non-terminali che possono generare words[i:j+1]
-        self.table = [[set() for _ in range(n)] for _ in range(n)]
+        self.table = [[set() for _ in range(n+1)] for _ in range(n+1)]
         
-        # Inizializza i back-pointers per ricostruire l'albero di parsing
+        # inizializza i puntatori per ricostruire l'albero di parsing
         self.back_pointers = [[defaultdict(list) for _ in range(n)] for _ in range(n)]
         
-        # FASE 1: Riempi la diagonale (parole singole)
+        # 1) riempie la diagonale
         for i in range(n):
             word = words[i]
             pos_tags = self.grammar.get_pos_for_word(word)
             
             if not pos_tags:
-                print(f"Attenzione: parola '{word}' non trovata nel lessico")
+                print(f"Parola '{word}' non trovata nel lessico")
                 return False, None
             
             for pos in pos_tags:
                 self.table[i][i].add(pos)
                 self.back_pointers[i][i][pos].append(('terminal', word))
             
-            # Aggiungi chiusura di regole unarie (A → B)
-            self._add_unary_closure(i, i)
+            self.add_unary_closure(i, i)
         
-        # FASE 2: Riempi la tabella bottom-up
-        # l è la lunghezza dello span (distanza tra i e j)
-        for length in range(2, n + 1):  # lunghezza dello span
-            for i in range(n - length + 1):  # inizio dello span
-                j = i + length - 1  # fine dello span
+        # 2) riempi la tabella bottom-up
+        # riempie dalla base
+        for j in range(1, n + 1): #range non include l'ultimo elemento    
+            word = words[j-1]
+            # Cerca regole A -> word
+            for A in self.grammar.get_rules_by_body(word):
+                self.table[j-1][j].add(A)
+                # Se vuoi gestire i back-pointers per i terminali
+                self.back_pointers[j-1][j][A].append(('terminal', word))
+
+            # cicla sulle colonne 
+            # Nota: il primo ciclo j l'abbiamo già iniziato sopra, ora procediamo con i e k
+            
+            # Ciclo 'for i' (Filling row i in column j)
+            # Dalla slide: i va da j-2 giù fino a 0
+            for i in range(j - 2, -1, -1):
                 
-                # Prova tutte le possibili divisioni dello span [i, j]
-                for k in range(i, j):  # punto di divisione
-                    # Cerca combinazioni B ∈ table[i][k] e C ∈ table[k+1][j]
-                    # che possano essere generate da A -> B C
+                # Ciclo 'for k' (Looping over split locations)
+                # Dalla slide: k va da i+1 a j-1
+                for k in range(i + 1, j):
                     
+                    # Check the grammar for rules A -> B C
+                    # B viene da [i, k] e C viene da [k, j]
                     for B in self.table[i][k]:
-                        for C in self.table[k+1][j]:
-                            # Cerca regole A -> B C
-                            head_list = self.grammar.get_rules_by_body((B, C))
+                        for C in self.table[k][j]:
+                            lhs_list = self.grammar.get_rules_by_body((B, C))
                             
-                            for A in head_list:
+                            for A in lhs_list:
                                 if A not in self.table[i][j]:
                                     self.table[i][j].add(A)
-                                    # Salva il back-pointer per ricostruire l'albero
-                                    self.back_pointers[i][j][A].append(('binary', k, B, C))
+                                
+                                # Salvataggio back-pointer coerente con gli indici
+                                self.back_pointers[i][j][A].append(('binary', k, B, C))
                 
-                # Aggiungi chiusura di regole unarie dopo ogni cella
-                self._add_unary_closure(i, j)
+                # Gestione opzionale delle regole unarie (se prevista dal tuo codice originale)
+                self.add_unary_closure(i, j)
+                    
+                    
+        # length è la lunghezza della distanza tra i e j
+        # for length in range(2, n + 1): # da 2 perché length=1 è già fatto e serve una coppia di parole, range non include l'ultimo elemento            
+            # for i in range(n - length + 1):  
+            #     j = i + length - 1 
+                
+            #     for k in range(i, j):
+            #         # divide la frase in due parti: words[i:k] e words[k+1:j]
+                
+            #         for B in self.table[i][k]:
+            #             for C in self.table[k+1][j]:
+            #                 # Cerca regole A -> B C
+            #                 head_list = self.grammar.get_rules_by_body((B, C))
+                            
+            #                 for A in head_list:
+            #                     if A not in self.table[i][j]:
+            #                         self.table[i][j].add(A)
+            #                         # Salva il back-pointer per ricostruire l'albero
+            #                         self.back_pointers[i][j][A].append(('binary', k, B, C))
+                
+            #     # Aggiungi chiusura di regole unarie dopo ogni cella
+            #     self.add_unary_closure(i, j)
         
-        # FASE 3: Verifica se il simbolo iniziale è nella cella [0][n-1]
+        # 3) verifica se il simbolo iniziale è nella cella [0][n-1]
+        
+        
         success = self.grammar.start_symbol in self.table[0][n-1]
         
         if success:
@@ -118,20 +152,16 @@ class CKYParser:
             return True, trees
         else:
             return False, None
-    
-    def _add_unary_closure(self, i: int, j: int):
-        """
-        Aggiunge la chiusura transitiva delle regole unarie (A → B) alla cella [i,j]
-        Questo gestisce regole come: NP → Pronoun, Nominal → Noun, etc.
-        """
+        
+    # gestisce regole come: NP → Pronoun, Nominal → Noun, etc.
+    def add_unary_closure(self, i: int, j: int):
         added = True
         while added:
             added = False
-            # Copia per evitare modifiche durante iterazione
             current_symbols = list(self.table[i][j])
             
             for B in current_symbols:
-                # Cerca regole unarie A → B
+                # cerca regole unarie A → B
                 unary_rules = self.grammar.get_rules_by_body((B,))
                 
                 for A in unary_rules:
@@ -262,8 +292,8 @@ def create_l1_grammar():
     grammar.add_lexical_rule('she', 'Pronoun')
     grammar.add_lexical_rule('me', 'Pronoun')
     
-    grammar.add_lexical_rule('United', 'Proper-Noun')
-    grammar.add_lexical_rule('Houston', 'Proper-Noun')
+    grammar.add_lexical_rule('united', 'Proper-Noun')
+    grammar.add_lexical_rule('houston', 'Proper-Noun')
     
     grammar.add_lexical_rule('the', 'Det')
     grammar.add_lexical_rule('a', 'Det')
@@ -282,8 +312,8 @@ def test_l1_grammar():
     parser = CKYParser(grammar)
     
     test_sentences = [
-        "book the flight through Houston",
-        "does she prefer a morning flight"
+        "Book the flight through Houston",
+        "Does she prefer a morning flight"
     ]
     
     for sentence in test_sentences:
