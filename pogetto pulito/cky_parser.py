@@ -56,20 +56,22 @@ class CKYParser:
         for j in range(1, n + 1):
             word = words[j-1]
             
-            # Filling the bottom cell - for all {A | A -> words[j] in grammar}
+            # riempie la diagonale
             for A in self.grammar.get_pos_for_word(word):
                 self.table[j-1][j].add(A)
                 self.back_pointers[j-1][j][A].append(('terminal', word))
             
             self.add_unary_closure(j-1, j)
             
-            # Filling row i in column j
-            for i in range(j - 2, -1, -1):
+            #j: numero di parole considerate
+            #i: punto da cui parte [0, 1, ...]
+            
+            # riempie la riga i nella colonna j 
+            for i in range(j - 2, -1, -1): 
                 
-                # Looping over the possible split locations
+                # cicla sui possibili punti di split
                 for k in range(i + 1, j):
                     
-                    # for all {A | A -> BC in grammar and B in table[i,k] and C in table[k,j]}
                     for B in self.table[i][k]:
                         for C in self.table[k][j]:
                             lhs_list = self.grammar.get_rules_by_body((B, C))
@@ -84,7 +86,7 @@ class CKYParser:
         success = self.grammar.start_symbol in self.table[0][n]
         
         if success:
-            trees = self._build_trees(0, n, self.grammar.start_symbol, words)
+            trees = self.build_trees(0, n, self.grammar.start_symbol, words)
             return True, trees
         else:
             return False, None
@@ -106,28 +108,28 @@ class CKYParser:
                         self.back_pointers[i][j][A].append(('unary', B))
                         added = True
     
-    def _build_trees(self, i: int, j: int, symbol: str, words: List[str]) -> List:
+    def build_trees(self, i: int, j: int, symbol: str, words: List[str]) -> List:
         trees = []
         
         if j - i == 1:
-            # Caso base: foglia (terminale)
+            # caso base: foglia (terminale)
             for bp_info in self.back_pointers[i][j][symbol]:
                 if bp_info[0] == 'terminal':
                     _, word = bp_info
                     trees.append([symbol, word])
                 elif bp_info[0] == 'unary':
                     _, B = bp_info
-                    subtrees = self._build_trees(i, j, B, words)
+                    subtrees = self.build_trees(i, j, B, words)
                     for subtree in subtrees:
                         trees.append([symbol, subtree])
         else:
-            # Caso ricorsivo: nodo interno
+            # caso ricorsivo: nodo interno
             for bp_info in self.back_pointers[i][j][symbol]:
                 if bp_info[0] == 'binary':
                     _, k, B, C = bp_info
                     
-                    left_trees = self._build_trees(i, k, B, words)
-                    right_trees = self._build_trees(k, j, C, words)
+                    left_trees = self.build_trees(i, k, B, words)
+                    right_trees = self.build_trees(k, j, C, words)
                     
                     for left_tree in left_trees:
                         for right_tree in right_trees:
@@ -135,17 +137,16 @@ class CKYParser:
                 
                 elif bp_info[0] == 'unary':
                     _, B = bp_info
-                    subtrees = self._build_trees(i, j, B, words)
+                    subtrees = self.build_trees(i, j, B, words)
                     for subtree in subtrees:
                         trees.append([symbol, subtree])
         
         return trees
     
     def print_table(self, words: List[str]):
-        """Stampa la tabella CKY in formato leggibile"""
         n = len(words)
-        print("\n=== CKY Table ===")
-        print(f"Words: {words}\n")
+        print("\nTabella CKY")
+        print(f"parole: {words}\n")
         
         for length in range(n, 0, -1):
             for i in range(n - length + 1):
@@ -156,7 +157,6 @@ class CKYParser:
             print()
     
     def print_tree(self, tree, indent=0):
-        """Stampa un albero di parsing in formato leggibile"""
         if isinstance(tree, list):
             if len(tree) == 2 and isinstance(tree[1], str):
                 # Foglia
@@ -227,8 +227,6 @@ def create_l1_grammar():
 def test_l1_grammar():
     
     grammar = create_l1_grammar()
-    print(grammar)
-    
     parser = CKYParser(grammar)
     
     test_sentences = [
@@ -245,13 +243,12 @@ def test_l1_grammar():
         parser.print_table(words)
         
         if success:
-            print(f"Parsing riuscito! Trovati {len(trees)} albero/i di parsing.\n")
-            for idx, tree in enumerate(trees, 1):
-                print(f"--- Parse Tree {idx} ---")
+            print(f"Parsing riuscito. Trovati {len(trees)} albero/i di parsing.\n")
+            for i, tree in enumerate(trees, 1):
+                print(f"--- Parse Tree {i} ---")
                 parser.print_tree(tree)
-                print()
         else:
-            print("Parsing fallito. La frase non è generabile dalla grammatica.\n")
+            print("Parsing fallito.\n")
 
 
 if __name__ == "__main__":
