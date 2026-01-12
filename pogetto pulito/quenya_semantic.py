@@ -4,70 +4,45 @@ from nltk import grammar, parse
 QUENYA_SEMANTIC_GRAMMAR = r"""
 % start S
 
-# Frasi base: NP + VP
+# frasi base: NP + VP
 S[SEM=<?subj(?vp)>] -> NP[NUM=?n,SEM=?subj] VP[NUM=?n,SEM=?vp]
 
-# Frasi con verbo flesso (pronome incorporato): solo VP
+# frasi solo VP
 S[SEM=?vp] -> VP[SEM=?vp]
 
-# Sintagmi nominali
+# sintagmi nominali
 NP[NUM=?n,SEM=<?det(?nom)>] -> Det[NUM=?n,SEM=?det] Nom[NUM=?n,SEM=?nom]
 NP[NUM=?n,SEM=?nom] -> Nom[NUM=?n,SEM=?nom]
 
-# Nominali
+# nominali
 Nom[NUM=?n,SEM=?nom] -> N[NUM=?n,SEM=?nom]
 
-# Sintagmi verbali
-# Verbo transitivo: V + NP (oggetto)
+# sintagmi verbali
+# verbo transitivo: V + NP
 VP[NUM=?n,SEM=<?v(?obj)>] -> TV[NUM=?n,SEM=?v] NP[SEM=?obj]
 
-# Verbo ditransitivo: V + NP + NP (oggetto indiretto + oggetto diretto)
-# In Quenya: antanë + i eldan (dativo) + tecil
+# verbo ditransitivo: V + NP + NP (oggetto indiretto + oggetto diretto)
 VP[NUM=?n,SEM=<?v(?obj1,?obj2)>] -> DTV[NUM=?n,SEM=?v] NP[SEM=?obj1] NP[SEM=?obj2]
 
-# Copula + Aggettivo predicativo (per "Nanye lumba" = I am tired)
-VP[SEM=<?cop(?adj)>] -> Cop[SEM=?cop] Adj[SEM=?adj]
-
-# Copula + Nome predicativo (per "Nálmë eldar" = we are elves)  
-VP[SEM=<?cop(?np)>] -> Cop[SEM=?cop] NP[SEM=?np]
-
-# DETERMINANTI
+# determianti
 Det[NUM=sg,SEM=<\P Q.exists x.(P(x) & Q(x))>] -> 'i'  
-Det[NUM=pl,SEM=<\P Q.exists x.(P(x) & Q(x))>] -> 'i'  
 
-# NOMI
+# nomi
 N[NUM=sg,SEM=<\x.hesto(x)>] -> 'hesto'     
 N[NUM=sg,SEM=<\x.macil(x)>] -> 'macil'     
 N[NUM=sg,SEM=<\x.aran(x)>] -> 'aran'       
 N[NUM=pl,SEM=<\x.aiwi(x)>] -> 'aiwi'       
-N[NUM=pl,SEM=<\x.elda(x)>] -> 'eldar'      
 N[NUM=sg,SEM=<\x.atan(x)>] -> 'atan'       
 N[NUM=sg,SEM=<\x.elda(x)>] -> 'eldan'      
 N[NUM=sg,SEM=<\x.tecil(x)>] -> 'tecil'     
 
-# AGGETTIVI
-Adj[SEM=<\x.lumba(x)>] -> 'lumba'          
-
-# VERBI TRANSITIVI (TV)
-# samë = has/have
+# verbi transitivi 
 TV[NUM=sg,SEM=<\X x.X(\y.have(x,y))>] -> 'samë'
-TV[NUM=pl,SEM=<\X x.X(\y.have(x,y))>] -> 'samë'
 
-# tíra = is watching / watches
 TV[NUM=sg,SEM=<\X x.X(\y.watch(x,y))>] -> 'tíra'
-TV[NUM=pl,SEM=<\X x.X(\y.watch(x,y))>] -> 'tíra'
 
-# VERBI DITRANSITIVI (DTV)
-# antanë = gave
+# verbi distransitivi
 DTV[NUM=sg,SEM=<\Y X x.X(\z.Y(\y.give(x,y,z)))>] -> 'antanë'
-DTV[NUM=pl,SEM=<\Y X x.X(\z.Y(\y.give(x,y,z)))>] -> 'antanë'
-
-# COPULA (verbi essere con pronomi incorporati)
-# nanye = I am (ná + -nye)
-Cop[SEM=<\P.P(speaker)>] -> 'nanye'        
-
-# nálmë = we are (ná + -lmë)  
-Cop[SEM=<\P.all x.(we(x) -> P(x))>] -> 'nálmë' 
 """
 
 def parse_with_semantics(sentence, grammar_obj):
