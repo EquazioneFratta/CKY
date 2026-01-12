@@ -197,7 +197,6 @@ def create_l1_grammar():
     grammar.add_rule('VP', ('VP', 'PP'))
     grammar.add_rule('PP', ('Preposition', 'NP'))
     
-    # regole lessicali 
     grammar.add_lexical_rule('book', 'Noun')
     grammar.add_lexical_rule('flight', 'Noun')
     grammar.add_lexical_rule('meal', 'Noun')
@@ -225,7 +224,6 @@ def create_l1_grammar():
     return grammar
 
 def test_l1_grammar():
-    
     grammar = create_l1_grammar()
     parser = CKYParser(grammar)
     
@@ -249,7 +247,6 @@ def test_l1_grammar():
                 parser.print_tree(tree)
         else:
             print("Parsing fallito.\n")
-
 
 if __name__ == "__main__":
     test_l1_grammar()
