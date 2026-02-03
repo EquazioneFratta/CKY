@@ -26,16 +26,16 @@ class Grammar:
                 result.append(head)
         return result
     
-    def is_cnf(self) -> bool:
-        for _, rules_list in self.rules.items():
-            for body in rules_list:
-                if len(body) > 2:
-                    return False
-                if len(body) == 2:
-                    # deve essere A -> B C (due non-terminali)<
-                    if not all(symbol[0].isupper() for symbol in body):
-                        return False
-        return True
+    # def is_cnf(self) -> bool:
+    #     for _, rules_list in self.rules.items():
+    #         for body in rules_list:
+    #             if len(body) > 2:
+    #                 return False
+    #             if len(body) == 2:
+    #                 # deve essere A -> B C (due non-terminali)<
+    #                 if not all(symbol[0].isupper() for symbol in body):
+    #                     return False
+    #     return True
 class CKYParser:
     
     def __init__(self, grammar: Grammar):
@@ -91,7 +91,7 @@ class CKYParser:
         else:
             return False, None
         
-    # gestisce regole come: NP → Pronoun, Nominal → Noun, etc.
+    # gestisce regole come: NP -> Pronoun, Nominal -> Noun, etc.
     def add_unary_closure(self, i: int, j: int):
         added = True
         while added:
@@ -99,7 +99,7 @@ class CKYParser:
             current_symbols = list(self.table[i][j])
             
             for B in current_symbols:
-                # cerca regole unarie A → B
+                # cerca regole unarie A -> B
                 unary_rules = self.grammar.get_rules_by_body((B,))
                 
                 for A in unary_rules:
